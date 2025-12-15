@@ -1,0 +1,28 @@
+# mac
+.DS_Store
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# venv
+.venv/
+venv/
+
+# env secrets
+.env
+.env.*
+
+# build
+dist/
+build/
+*.egg-info/
+
+# editor
+.vscode/
+.idea/
