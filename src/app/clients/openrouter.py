@@ -32,62 +32,62 @@ class OpenRouterClient:
             # "X-Title": "LLM Court",
         }
 
-        # try:
-        #     async with httpx.AsyncClient(timeout=60.0) as client:
-        #         r = await client.post(f"{self.base_url}/chat/completions", json=payload, headers=headers)
-        #     # If 429, handle before raise_for_status so we can read headers safely
-        #     if r.status_code == 429:
-        #         retry_after = r.headers.get("Retry-After")
-        #         msg = "OpenRouter rate-limited (429)."
-        #         if retry_after:
-        #             msg += f" Retry-After: {retry_after}s."
-        #         raise OpenRouterRateLimitError(msg)
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                r = await client.post(f"{self.base_url}/chat/completions", json=payload, headers=headers)
+            # If 429, handle before raise_for_status so we can read headers safely
+            if r.status_code == 429:
+                retry_after = r.headers.get("Retry-After")
+                msg = "OpenRouter rate-limited (429)."
+                if retry_after:
+                    msg += f" Retry-After: {retry_after}s."
+                raise OpenRouterRateLimitError(msg)
 
-        #     r.raise_for_status()
-        #     data = r.json()
-        #     model_message = data["choices"][0]["message"]
-        #     return {
-        #         "content": model_message.get("content"),
-        #         "reasoning_details": model_message.get("reasoning"),
-        #     }
+            r.raise_for_status()
+            data = r.json()
+            model_message = data["choices"][0]["message"]
+            return {
+                "content": model_message.get("content"),
+                "reasoning_details": model_message.get("reasoning"),
+            }
 
-        # except httpx.HTTPStatusError as e:
-        #     # Non-429 HTTP errors
-        #     raise RuntimeError(
-        #         f"OpenRouter API request failed: {e.response.status_code} {e.response.text}"
-        #     ) from e
-        # except httpx.HTTPError as e:
-        #     raise RuntimeError(f"OpenRouter network error: {e}") from e
+        except httpx.HTTPStatusError as e:
+            # Non-429 HTTP errors
+            raise RuntimeError(
+                f"OpenRouter API request failed: {e.response.status_code} {e.response.text}"
+            ) from e
+        except httpx.HTTPError as e:
+            raise RuntimeError(f"OpenRouter network error: {e}") from e
 
-        for attempt in range(max_retries + 1):
-            try:
-                async with httpx.AsyncClient(timeout=60.0) as client:
-                    r = await client.post(f"{self.base_url}/chat/completions", json=payload, headers=headers)
+        # for attempt in range(max_retries + 1):
+        #     try:
+        #         async with httpx.AsyncClient(timeout=60.0) as client:
+        #             r = await client.post(f"{self.base_url}/chat/completions", json=payload, headers=headers)
 
-                # If 429, handle before raise_for_status so we can read headers safely
-                    if r.status_code == 429:
-                        retry_after = r.headers.get("Retry-After")
-                        wait_s = float(retry_after) if retry_after and retry_after.isdigit() else (1.5 * (2 ** attempt))
-                        if attempt < max_retries:
-                            await asyncio.sleep(wait_s)
-                            continue
-                        raise OpenRouterRateLimitError(
-                            f"OpenRouter rate-limited (429). Try again in ~{wait_s:.1f}s or reduce request frequency."
-                        )
+        #         # If 429, handle before raise_for_status so we can read headers safely
+        #             if r.status_code == 429:
+        #                 retry_after = r.headers.get("Retry-After")
+        #                 wait_s = float(retry_after) if retry_after and retry_after.isdigit() else (1.5 * (2 ** attempt))
+        #                 if attempt < max_retries:
+        #                     await asyncio.sleep(wait_s)
+        #                     continue
+        #                 raise OpenRouterRateLimitError(
+        #                     f"OpenRouter rate-limited (429). Try again in ~{wait_s:.1f}s or reduce request frequency."
+        #                 )
 
-                    r.raise_for_status()
-                    data = r.json()
-                    model_message = data["choices"][0]["message"]
-                    return {
-                        "content": model_message.get("content"),
-                        "reasoning_details": model_message.get("reasoning"),
-                    }
+        #             r.raise_for_status()
+        #             data = r.json()
+        #             model_message = data["choices"][0]["message"]
+        #             return {
+        #                 "content": model_message.get("content"),
+        #                 "reasoning_details": model_message.get("reasoning"),
+        #             }
 
-            except httpx.HTTPStatusError as e:
-                # Non-429 HTTP errors
-                raise RuntimeError(f"OpenRouter API request failed: {e.response.status_code} {e.response.text}") from e
-            except httpx.HTTPError as e:
-                raise RuntimeError(f"OpenRouter network error: {e}") from e
+        #     except httpx.HTTPStatusError as e:
+        #         # Non-429 HTTP errors
+        #         raise RuntimeError(f"OpenRouter API request failed: {e.response.status_code} {e.response.text}") from e
+        #     except httpx.HTTPError as e:
+        #         raise RuntimeError(f"OpenRouter network error: {e}") from e
     
     async def query_model_parallel(
         self,

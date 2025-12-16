@@ -60,6 +60,7 @@ class CourtService:
         return CourtResponse(
             case=case,
             case_id=case_id,
+            case_title=await self.generate_case_title(case),
             stage1=stage1_result,
             stage2=stage2_result,
             stage3=stage3_result,
@@ -79,6 +80,23 @@ class CourtService:
         for m in stage4_result:
             jury_map[m.res.model or "unknown_model"] = (m.res.content if m.res else "")
         return jury_map
+
+    async def generate_case_title(self, case: str) -> str:
+        message = [
+            {"role": "system", "content": "You are a helpful assistant that generates concise and descriptive titles for legal cases."},
+            {"role": "user", "content": f"Generate a concise strict 3-5 words maximum and descriptive title for the following legal case:\n\n{case}"}]
+        try:
+            response = await self.llm.query_model(
+                model=settings.CASE_TITLE_MODEL,
+                messages=message,
+            )
+            if response is None or "content" not in response:
+                raise HTTPException(status_code=502, detail="LLM returned no content for case title.")  
+            return response["content"].strip().strip('"')
+        except OpenRouterRateLimitError as e:
+            raise HTTPException(status_code=429, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")        
 
     async def stage_1_execution_opening_statement(self, request: CourtRequest) -> List[TranscriptMessage]:
             print("Starting stage 1 execution")
@@ -263,7 +281,7 @@ class CourtService:
             raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
         
 
-    async def stage_4_jury_deliberation(self, request: CourtRequest, stage1_result: List[TranscriptMessage], stage2_result: List[TranscriptMessage], stage3_result: List[TranscriptMessage]) -> str:
+    async def stage_4_jury_deliberation(self, request: CourtRequest, stage1_result: List[TranscriptMessage], stage2_result: List[TranscriptMessage], stage3_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
         print("Starting stage 4 execution")
         case = (request.case or "").strip()
         if not case:
@@ -318,7 +336,7 @@ class CourtService:
         except Exception as e:
             raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
         
-    async def stage_5_judge_closing_remarks(self, request: CourtRequest, stage4_result: List[TranscriptMessage]) -> TranscriptMessage:
+    async def stage_5_judge_closing_remarks(self, request: CourtRequest, stage4_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
         print("Starting stage 5 execution")
         case = (request.case or "").strip()
         if not case:
@@ -348,7 +366,7 @@ class CourtService:
                 )
             )
             print("Completed stage 5 execution")
-            return transcript_message
+            return [transcript_message] # sending list to be consistent with other stages
         except OpenRouterRateLimitError as e:
             # Return the real status to the frontend instead of a fake "invalid case"
             raise HTTPException(status_code=429, detail=str(e))
