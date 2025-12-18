@@ -29,6 +29,8 @@ from app.core.prompts.stage5_prompts import (
     STAGE5_JUDGE_MAJORITY_USER_PROMPT,
 )
 
+
+
 class CourtService:
     def __init__(self, llm: OpenRouterClient):
         self.llm = llm
