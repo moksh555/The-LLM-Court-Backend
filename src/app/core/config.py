@@ -1,13 +1,14 @@
 import os
-from typing import List
+from typing import List, Optional
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 load_dotenv()
 
 class Config(BaseSettings):
-    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_ACCESS_KEY_ID: Optional[str] = Field(default=None)
+    AWS_SECRET_ACCESS_KEY: Optional[str] = Field(default=None)
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     USER_TABLE_NAME: str = os.getenv("USER_TABLE_NAME", "LLM-COURT-USER")
     CHAT_TABLE_NAME: str = os.getenv("CHAT_TABLE_NAME", "LLM-COURT-USER-CHAT")
