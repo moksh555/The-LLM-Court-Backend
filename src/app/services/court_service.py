@@ -1,7 +1,7 @@
-from http.client import HTTPException
 import json
 from typing import List
 import uuid
+from fastapi import HTTPException
 from app.repositories.case_store import CaseStore
 from app.schemas.court import CourtRequest, CourtResponse, TranscriptMessage, TranscriptRes
 from app.clients.openrouter import OpenRouterClient, OpenRouterRateLimitError

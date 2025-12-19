@@ -24,7 +24,6 @@ async def stream_court_updates(request: CourtRequest, service: CourtService = De
     Endpoint to stream real-time court updates for a given request ID.
     """
     
-
     if not request.case or not request.case.strip():
         raise HTTPException(status_code=400, detail="Case description cannot be empty.")
 
