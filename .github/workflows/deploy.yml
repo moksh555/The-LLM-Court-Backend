@@ -3,11 +3,6 @@ name: Deploy Backend to EC2 (ECR)
 on:
   push:
     branches: ["main"]
-    # optional: only deploy when backend changes
-    paths:
-      - "Backend/**"
-      - ".github/workflows/deploy.yml"
-  workflow_dispatch: {}
 
 jobs:
   deploy:
