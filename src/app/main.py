@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
     if settings.CORS_ORIGINS:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=["http://localhost:5173"],
+            allow_origins=["http://localhost:5173", "https://the-llm-court-frontend.vercel.app", "https://llm-court.com",],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],

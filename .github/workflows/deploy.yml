@@ -1,0 +1,86 @@
+name: Deploy Backend to EC2 (ECR)
+
+on:
+  push:
+    branches: ["main"]
+    # optional: only deploy when backend changes
+    paths:
+      - "Backend/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS creds (for pushing to ECR)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Docker image to ECR
+        run: |
+          set -euo pipefail
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}"
+
+          # Adjust Dockerfile path if yours is different
+          docker build -f Backend/Dockerfile -t "${IMAGE_URI}:${GITHUB_SHA}" -t "${IMAGE_URI}:latest" .
+          docker push "${IMAGE_URI}:${GITHUB_SHA}"
+          docker push "${IMAGE_URI}:latest"
+
+      - name: Decode SSH key
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > key.pem
+          chmod 600 key.pem
+
+      - name: Deploy on EC2 (pull latest and restart container)
+        run: |
+          set -euo pipefail
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
+          CONTAINER_NAME="llm-court-backend"
+
+          ssh -o StrictHostKeyChecking=no -i key.pem "${EC2_USER}@${EC2_HOST}" << EOF
+            set -euo pipefail
+
+            # NOTE: This uses EC2 instance IAM role for auth to ECR.
+            aws ecr get-login-password --region "${AWS_REGION}" \
+              | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
+
+            docker pull "${IMAGE_URI}"
+
+            docker stop "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+            docker rm "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+
+            # Run backend bound to localhost only (nginx is public entry)
+            docker run -d \
+              --name "${CONTAINER_NAME}" \
+              --restart unless-stopped \
+              --env-file /opt/llm-court/backend.env \
+              -p 127.0.0.1:8000:8000 \
+              "${IMAGE_URI}"
+
+            # Health check (GET)
+            sleep 2
+            curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null
+
+            echo "Deploy OK: ${CONTAINER_NAME} restarted with ${IMAGE_URI}"
+          EOF
