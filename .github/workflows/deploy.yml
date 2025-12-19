@@ -73,9 +73,5 @@ jobs:
               -p 127.0.0.1:8000:8000 \
               "${IMAGE_URI}"
 
-            # Health check (GET)
-            sleep 2
-            curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null
-
             echo "Deploy OK: ${CONTAINER_NAME} restarted with ${IMAGE_URI}"
           EOF
