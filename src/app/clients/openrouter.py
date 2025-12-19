@@ -6,6 +6,7 @@ import asyncio
 class OpenRouterRateLimitError(RuntimeError):
     pass
 
+# the comment code here is for testing purpose for using free teir model on openrouter 
 class OpenRouterClient:
     def __init__(self):
         self.api_key = settings.OPENROUTER_API_KEY
@@ -15,7 +16,6 @@ class OpenRouterClient:
         self,
         model: str,
         messages: List[Dict[str, str]],
-        max_retries: int = 3,
     ) -> Dict[str, Any]:
         payload: Dict[str, Any] = {
             "model": model,

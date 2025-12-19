@@ -7,6 +7,8 @@ from pydantic import Field
 load_dotenv()
 
 class Config(BaseSettings):
+
+    # oPtional beacuse in ec2 the boto3 can directly connect with dyanomdb no need to pass in aws keys
     AWS_ACCESS_KEY_ID: Optional[str] = Field(default=None)
     AWS_SECRET_ACCESS_KEY: Optional[str] = Field(default=None)
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
