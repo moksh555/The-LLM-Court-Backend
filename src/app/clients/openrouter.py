@@ -9,8 +9,13 @@ class OpenRouterRateLimitError(RuntimeError):
 # the comment code here is for testing purpose for using free teir model on openrouter 
 class OpenRouterClient:
     def __init__(self):
-        self.api_key = settings.OPENROUTER_API_KEY
-        self.base_url = settings.OPENROUTER_BASE_URL.rstrip("/")
+        self.api_key = (settings.OPENROUTER_API_KEY or "").strip()
+        if not self.api_key:
+            raise RuntimeError("OPENROUTER_API_KEY is missing/empty")
+
+        self.base_url = (settings.OPENROUTER_BASE_URL or "").strip().rstrip("/")
+        if not self.base_url:
+            raise RuntimeError("OPENROUTER_BASE_URL is missing/empty")
 
     async def query_model(
         self,
