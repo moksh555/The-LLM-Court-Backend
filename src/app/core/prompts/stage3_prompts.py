@@ -41,7 +41,8 @@ Formatting rules for the "content" field:
 - Each section must be exactly:
   Heading line
   One paragraph
-- Headings must be simple text (no markdown symbols like #, no bullets, no numbering, just bold).
+  Space
+- Headings must be simple text (no markdown symbols like #, no bullets, no numbering).
 - No bullet points anywhere.
 
 Structure requirements for the "content" field:
@@ -56,12 +57,7 @@ Structure requirements for the "content" field:
   “Defense claim:” and “Plaintiff rebuttal:”
   (Keep it one paragraph per section; you can include multiple labeled sentences.)
 
-Output format:
-Return valid JSON with exactly two keys:
-- "content": string
-- "reasoning_details": string
 
-Return ONLY JSON.
 """.strip()
 
 
@@ -77,7 +73,7 @@ Important:
 
 CASE:
 <<<
-{case_text}
+{case}
 >>>
 
 PLAINTIFF_STAGE1 (Opening):
@@ -148,7 +144,8 @@ Formatting rules for the "content" field:
 - Each section must be exactly:
   Heading line
   One paragraph
-- Headings must be simple text (no markdown symbols like #, no bullets, no numbering, just bold).
+  Space
+- Headings must be simple text (no markdown symbols like #, no bullets, no numbering).
 - No bullet points anywhere.
 
 Structure requirements for the "content" field:
@@ -163,12 +160,6 @@ Structure requirements for the "content" field:
   “Plaintiff claim:” and “Defense contradiction:”
   (Keep it one paragraph per section; you can include multiple labeled sentences.)
 
-Output format:
-Return valid JSON with exactly two keys:
-- "content": string
-- "reasoning_details": string
-
-Return ONLY JSON.
 """.strip()
 
 STAGE3_DEFENSE_USER_PROMPT = """
@@ -181,7 +172,7 @@ Important:
 
 CASE:
 <<<
-{case_text}
+{case}
 >>>
 
 PLAINTIFF_STAGE1 (Opening):

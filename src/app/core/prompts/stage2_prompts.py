@@ -44,7 +44,8 @@ Formatting rules for the "content" field (consistency):
 - Each section must be exactly:
   Heading line
   One paragraph
-- Headings must be simple text (no markdown symbols like #, no bullets, no numbering, just bold text).
+  Space
+- Headings must be simple text (no markdown symbols like #, no bullets, no numbering).
 - No bullet points anywhere.
 - Inside paragraphs, you may use short labeled sentences (e.g., “Defense claim: … Plaintiff rebuttal: …”) but keep the bullet numbers consistent(e.g. "1." "2." "3.")
 
@@ -58,9 +59,6 @@ Structure requirements for the "content" field:
 - End with a final section stating what you want the jury/judge to conclude at this stage.
 
 
-Output MUST be valid JSON with exactly: 
-- "content": string 
-- "reasoning_details": string Return ONLY JSON.
 """
 
 
@@ -77,17 +75,17 @@ Important:
 
 CASE:
 <<<
-{case_text}
+{case}
 >>>
 
 PLAINTIFF_STAGE1 (Opening):
 <<<
-{plaintiff_stage1_text}
+{stage1_plaintiff_opening}
 >>>
 
 DEFENSE_STAGE1 (Opening):
 <<<
-{defense_stage1_text}
+{stage1_defense_opening}
 >>>
 
 Task:
@@ -142,7 +140,8 @@ Formatting rules for the "content" field (consistency):
 - Each section must be exactly:
   Heading line
   One paragraph
-- Headings must be simple text (no markdown symbols like #, no bullets, no numbering, just bold).
+  Space
+- Headings must be simple text (no markdown symbols like #, no bullets, no numbering).
 - No bullet points anywhere.
 - Inside paragraphs, you may use short labeled sentences (e.g., “Plaintiff claim: … Defense response: …”) but keep it as one paragraph.
 
@@ -156,12 +155,7 @@ Structure requirements for the "content" field:
 - Include one section that acknowledges Plaintiff’s strongest point and explains why it is still insufficient, incomplete, or contingent (steelman, then rebut).
 - End with a final section stating what you want the jury/judge to conclude at this stage.
 
-Output format:
-Return valid JSON with exactly two keys:
-- "content": string
-- "reasoning_details": string 
 
-Return ONLY JSON.
 """.strip()
 
 
@@ -175,22 +169,22 @@ Important:
 
 CASE:
 <<<
-{case_text}
+{case}
 >>>
 
 PLAINTIFF_STAGE1 (Opening):
 <<<
-{plaintiff_stage1_text}
+{stage1_plaintiff_opening}
 >>>
 
 DEFENSE_STAGE1 (Opening — your prior position; must remain consistent):
 <<<
-{defense_stage1_text}
+{stage1_defense_opening}
 >>>
 
 PLAINTIFF_STAGE2 (must be rebutted point-by-point):
 <<<
-{plaintiff_stage2_text}
+{stage2_plaintiff_argument}
 >>>
 
 Task:

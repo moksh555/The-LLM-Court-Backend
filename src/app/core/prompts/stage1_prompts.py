@@ -28,7 +28,7 @@ Hard rules (anti-hallucination):
 Formatting rules (consistency):
 - Output must be plain text with multiple sections.
 - Each section must be exactly: a Heading line, then one paragraph.
-- Headings must be simple text (no markdown symbols like #, no bullets, no numbering and just bold).
+- Headings must be simple text (no markdown symbols like #, no bullets, no numbering).
 
 Content requirements:
 - Define key terms when the claim is broad (e.g., “good for humanity,” “AI,” “benefit,” “harm,” “fairness,” “risk”).

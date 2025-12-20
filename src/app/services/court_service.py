@@ -223,8 +223,8 @@ class CourtService:
         
         try:
             #gather stage2 arguments from both parties
-            stage1_plaintiff_argument = self.find_message_by_role(stage1_result, "plaintiff")
-            stage1_defense_argument = self.find_message_by_role(stage1_result, "defense")
+            stage1_plaintiff_opening = self.find_message_by_role(stage1_result, "plaintiff")
+            stage1_defense_opening = self.find_message_by_role(stage1_result, "defense")
             stage2_plaintiff_argument = self.find_message_by_role(stage2_result, "plaintiff")
             stage2_defense_argument = self.find_message_by_role(stage2_result, "defense")
             if not stage2_plaintiff_argument or not stage2_defense_argument:
@@ -238,8 +238,8 @@ class CourtService:
                 {"role": "system", "content": STAGE3_PLAINTIFF_SYSTEM_PROMPT},
                 {"role": "user", "content": STAGE3_PLAINTIFF_USER_PROMPT.format(
                     case=case,
-                    stage1_plaintiff_argument=stage1_plaintiff_argument,
-                    stage1_defense_argument=stage1_defense_argument,
+                    stage1_plaintiff_opening=stage1_plaintiff_opening,
+                    stage1_defense_opening=stage1_defense_opening,
                     stage2_plaintiff_argument=stage2_plaintiff_argument,
                     stage2_defense_argument=stage2_defense_argument,
                 )},
@@ -249,8 +249,8 @@ class CourtService:
                 {"role": "system", "content": STAGE3_DEFENSE_SYSTEM_PROMPT},
                 {"role": "user", "content": STAGE3_DEFENSE_USER_PROMPT.format(
                     case=case,
-                    stage1_plaintiff_argument=stage1_plaintiff_argument,
-                    stage1_defense_argument=stage1_defense_argument,
+                    stage1_plaintiff_opening=stage1_plaintiff_opening,
+                    stage1_defense_opening=stage1_defense_opening,
                     stage2_plaintiff_argument=stage2_plaintiff_argument,
                     stage2_defense_argument=stage2_defense_argument,
                 )},

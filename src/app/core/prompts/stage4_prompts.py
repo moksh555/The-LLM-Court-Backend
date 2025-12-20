@@ -29,6 +29,13 @@ Required outputs:
 - Decision logic explaining why the winning side wins
 - A final verdict block EXACTLY at the very end in the required format
 
+OUTPUT RULES (STRICT):
+- Return PLAIN TEXT only.
+- Do NOT use Markdown formatting.
+- Do NOT use: headings (#), bullet points (-, *), bold (**), italics (_), or code fences (```).
+- Do NOT add any preface like "DECISION LOGIC" or "And:".
+- Write as normal sentences with labels.
+
 Verdict block format (must be last, no text after it):
 VERDICT:
 Defense - Yes/No
@@ -41,7 +48,7 @@ No extra lines after the verdict block.
 STAGE4_JURY_USER_PROMPT = """
 CASE:
 <<<
-{case_text}
+{case}
 >>>
 
 ========================
