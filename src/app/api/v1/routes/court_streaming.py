@@ -59,7 +59,7 @@ async def event_generator(request: CourtRequest, service: CourtService, store: C
 
         #stage 3
         yield f"data: {json.dumps({'type': 'Waiting for Closing Statements'})}\n\n"
-        stage3_result = await service.stage_3_execution_closing_statement(request, stage2_result)
+        stage3_result = await service.stage_3_execution_closing_statement(request,stage1_result, stage2_result)
         yield f"data: {json.dumps({'type': 'Done with Closing Statements', 'data': [m.model_dump() for m in stage3_result]})}\n\n"
 
         #stage 4
@@ -71,7 +71,7 @@ async def event_generator(request: CourtRequest, service: CourtService, store: C
 
         #stage 5
         yield f"data: {json.dumps({'type': 'Waiting for Judge Closing Remarks'})}\n\n"
-        stage5_result = await service.stage_5_judge_closing_remarks(request, stage4_result)
+        stage5_result = await service.stage_5_judge_closing_remarks(request, stage1_result, stage2_result, stage3_result, stage4_result)
         yield f"data: {json.dumps({'type': 'Done with Judge Closing Remarks', 'data': [m.model_dump() for m in stage5_result]})}\n\n"
 
         # TODO: Save the complete court session to the DynamoDB CaseStore here

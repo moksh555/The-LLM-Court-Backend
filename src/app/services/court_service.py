@@ -215,7 +215,7 @@ class CourtService:
         except Exception as e:
             raise HTTPException(status_code=502, detail=f"LLM call failed at stage2 plaintiff: {e}")
     
-    async def stage_3_execution_closing_statement(self, request: CourtRequest, stage2_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
+    async def stage_3_execution_closing_statement(self, request: CourtRequest, stage1_result: List[TranscriptMessage], stage2_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
         print("Starting stage 3 execution")
         case = (request.case or "").strip()
         if not case:
@@ -223,6 +223,8 @@ class CourtService:
         
         try:
             #gather stage2 arguments from both parties
+            stage1_plaintiff_argument = self.find_message_by_role(stage1_result, "plaintiff")
+            stage1_defense_argument = self.find_message_by_role(stage1_result, "defense")
             stage2_plaintiff_argument = self.find_message_by_role(stage2_result, "plaintiff")
             stage2_defense_argument = self.find_message_by_role(stage2_result, "defense")
             if not stage2_plaintiff_argument or not stage2_defense_argument:
@@ -236,6 +238,8 @@ class CourtService:
                 {"role": "system", "content": STAGE3_PLAINTIFF_SYSTEM_PROMPT},
                 {"role": "user", "content": STAGE3_PLAINTIFF_USER_PROMPT.format(
                     case=case,
+                    stage1_plaintiff_argument=stage1_plaintiff_argument,
+                    stage1_defense_argument=stage1_defense_argument,
                     stage2_plaintiff_argument=stage2_plaintiff_argument,
                     stage2_defense_argument=stage2_defense_argument,
                 )},
@@ -245,6 +249,8 @@ class CourtService:
                 {"role": "system", "content": STAGE3_DEFENSE_SYSTEM_PROMPT},
                 {"role": "user", "content": STAGE3_DEFENSE_USER_PROMPT.format(
                     case=case,
+                    stage1_plaintiff_argument=stage1_plaintiff_argument,
+                    stage1_defense_argument=stage1_defense_argument,
                     stage2_plaintiff_argument=stage2_plaintiff_argument,
                     stage2_defense_argument=stage2_defense_argument,
                 )},
@@ -338,20 +344,33 @@ class CourtService:
         except Exception as e:
             raise HTTPException(status_code=502, detail=f"LLM call failed: {e}")
         
-    async def stage_5_judge_closing_remarks(self, request: CourtRequest, stage4_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
+    async def stage_5_judge_closing_remarks(self, request: CourtRequest, stage1_result: List[TranscriptMessage], stage2_result: List[TranscriptMessage], stage3_result: List[TranscriptMessage], stage4_result: List[TranscriptMessage]) -> List[TranscriptMessage]:
         print("Starting stage 5 execution")
         case = (request.case or "").strip()
         if not case:
             raise HTTPException(status_code=400, detail="Case description cannot be empty.")
         jury_map = self.build_jury_map(stage4_result)
         stage4_jury_map_text = json.dumps(jury_map, indent=2, ensure_ascii=False)
+        stage1_p = self.find_message_by_role(stage1_result, "plaintiff")
+        stage1_d = self.find_message_by_role(stage1_result, "defense")
+        stage2_p = self.find_message_by_role(stage2_result, "plaintiff")
+        stage2_d = self.find_message_by_role(stage2_result, "defense")
+        stage3_p = self.find_message_by_role(stage3_result, "plaintiff")
+        stage3_d= self.find_message_by_role(stage3_result, "defense")
         judge_messages = [
         {"role": "system", "content": STAGE5_JUDGE_MAJORITY_SYSTEM_PROMPT},
         {"role": "user", "content": STAGE5_JUDGE_MAJORITY_USER_PROMPT.format(
             case=case,
+            stage1_plaintiff_opening=stage1_p,
+            stage1_defense_opening=stage1_d,
+            stage2_plaintiff_argument=stage2_p,
+            stage2_defense_argument=stage2_d,
+            stage3_plaintiff_closing=stage3_p,
+            stage3_defense_closing=stage3_d,
             stage4_jury_map=stage4_jury_map_text,
         )},
     ]
+        
         try:
             response = await self.llm.query_model(
                 model=settings.JUDGE_MODEL,
