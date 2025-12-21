@@ -1,11 +1,12 @@
 from typing import Any, Dict
 from decimal import Decimal
 
-from fastapi import APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
-
+from fastapi import APIRouter, HTTPException #type: ignore
+from fastapi.encoders import jsonable_encoder #type: ignore
+from app.api.auth_deps import get_current_user
 from app.core.config import settings
-import boto3
+import boto3 #type: ignore
+from fastapi import Depends #type: ignore
 
 router = APIRouter()
 
@@ -23,13 +24,19 @@ def _to_json_safe(x: Any) -> Any:
     return x
 
 @router.get("/chats/{chat_id}")
-def get_chat(chat_id: str) -> Dict[str, Any]:
+def get_chat(chat_id: str, current_user=Depends(get_current_user)) -> Dict[str, Any]:
+    user_id = current_user.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     dynamo = boto3.resource("dynamodb", region_name=settings.AWS_REGION)
     chat_table = dynamo.Table(settings.CHAT_TABLE_NAME)
 
     resp = chat_table.get_item(Key={"chat_id": chat_id})
     item = resp.get("Item")
     if not item:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    if item.get("user_id") != user_id:
         raise HTTPException(status_code=404, detail="Chat not found")
 
     # ensure JSON-safe output (Decimal -> int/float, etc.)

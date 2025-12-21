@@ -3,15 +3,11 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import AsyncGenerator
-
 from fastapi import APIRouter, Depends, HTTPException, Request # type: ignore
 from fastapi.responses import StreamingResponse # type: ignore
-
-
+from app.api.auth_deps import get_current_user
 from app.schemas.court import CourtRequest, CourtResponse
-from app.repositories.case_store import CaseStore
-from app.api.deps import get_case_store, get_court_service
-from app.services.court_service import CourtService
+from app.api.deps import get_court_service
 from app.core.config import settings
 import boto3 # type: ignore
 
@@ -19,7 +15,7 @@ import boto3 # type: ignore
 router = APIRouter()
 
 @router.post("/case/stream")
-async def stream_court_updates(request: CourtRequest, service: CourtService = Depends(get_court_service), CaseStore = Depends(get_case_store)) -> StreamingResponse:
+async def stream_court_updates(request: CourtRequest, service=Depends(get_court_service), current_user=Depends(get_current_user)) -> StreamingResponse:
     """
     Endpoint to stream real-time court updates for a given request ID.
     """
@@ -29,13 +25,13 @@ async def stream_court_updates(request: CourtRequest, service: CourtService = De
 
 
     return StreamingResponse(
-        event_generator(request, service, CaseStore),
+        event_generator(request, service, current_user.get("user_id")),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache"},
         )
 
 
-async def event_generator(request: CourtRequest, service: CourtService, store: CaseStore) -> AsyncGenerator[str, None]:
+async def event_generator(request: CourtRequest, service, user_id) -> AsyncGenerator[str, None]:
     """
     Generator function to yield court updates as server-sent events.
     """
@@ -84,7 +80,7 @@ async def event_generator(request: CourtRequest, service: CourtService, store: C
         try:
             chat_table.put_item(Item={
                 "chat_id": request.case_id,
-                "user_id": request.user_id,
+                "user_id": user_id,
                 "case_date_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "case_title": court_title,
                 "stage1_results":[m.model_dump() for m in stage1_result],
@@ -97,8 +93,6 @@ async def event_generator(request: CourtRequest, service: CourtService, store: C
             print(f"Error saving chat session: {e}")
         yield f"data: {json.dumps({'type': 'data saved'})}\n\n"
 
-        user = user_table.get_item(Key={'user_id': request.user_id})
-        user_item = user.get('Item')
         try:
             created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -109,7 +103,7 @@ async def event_generator(request: CourtRequest, service: CourtService, store: C
                 "case": request.case,}
 
             user_table.update_item(
-                Key={"user_id": request.user_id},
+                Key={"user_id": user_id},
                 UpdateExpression="SET chat_history = list_append(if_not_exists(chat_history, :empty), :new)",
                 ExpressionAttributeValues={
                     ":empty": [],

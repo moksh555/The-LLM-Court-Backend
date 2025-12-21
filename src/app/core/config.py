@@ -1,8 +1,8 @@
 import os
 from typing import List, Optional
-from dotenv import load_dotenv
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from dotenv import load_dotenv #type: ignore
+from pydantic_settings import BaseSettings, SettingsConfigDict #type: ignore
+from pydantic import Field #type: ignore
 
 load_dotenv()
 
@@ -35,6 +35,11 @@ class Config(BaseSettings):
     ]
 
     JUDGE_MODEL: str = "x-ai/grok-4.1-fast"
+
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
+    COOKIE_SECURE: bool = Field(default=False, env="COOKIE_SECURE") 
+    COOKIE_SAMESITE: str = Field(default="lax", env="COOKIE_SAMESITE")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

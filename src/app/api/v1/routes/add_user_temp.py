@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime, timezone
+from fastapi import APIRouter, HTTPException #type: ignore
+from pydantic import BaseModel, EmailStr, Field #type: ignore
+from datetime import datetime, timezone #type: ignore
 import uuid
 
-import boto3
-from botocore.exceptions import ClientError
+import boto3 #type: ignore
+from botocore.exceptions import ClientError #type: ignore
 
 from app.core.config import settings  # adjust import to your project
 

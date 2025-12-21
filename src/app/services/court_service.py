@@ -1,8 +1,7 @@
 import json
 from typing import List
 import uuid
-from fastapi import HTTPException
-from app.repositories.case_store import CaseStore
+from fastapi import HTTPException #type: ignore
 from app.schemas.court import CourtRequest, CourtResponse, TranscriptMessage, TranscriptRes
 from app.clients.openrouter import OpenRouterClient, OpenRouterRateLimitError
 from app.core.config import settings
@@ -35,30 +34,23 @@ class CourtService:
     def __init__(self, llm: OpenRouterClient):
         self.llm = llm
 
-    async def run_case(self, request: CourtRequest, store: CaseStore) -> CourtResponse:
+    async def run_case(self, request: CourtRequest) -> CourtResponse:
         print("Logged in run_case")
         case = (request.case or "").strip()
         if not case:
             raise HTTPException(status_code=400, detail="Case description cannot be empty.")
         case_id = request.case_id
         case_id = request.case_id or str(uuid.uuid4())
-        store.create_with_id(case_id, case)
 
         stage1_result = await self.stage_1_execution_opening_statement(request)
-        store.append(case_id, stage1_result)
 
         stage2_result = await self.stage_2_execution_argument(request, stage1_result)
-        store.append(case_id, stage2_result)
 
         stage3_result = await self.stage_3_execution_closing_statement(request, stage2_result)
-        store.append(case_id, stage3_result)
 
         stage4_result = await self.stage_4_jury_deliberation(request, stage1_result, stage2_result, stage3_result)
-        store.append(case_id, stage4_result)
 
         stage5_result = await self.stage_5_judge_closing_remarks(request, stage4_result)
-        store.append(case_id, [stage5_result])
-        print("Completed run_case")
         return CourtResponse(
             case=case,
             case_id=case_id,

@@ -1,9 +1,10 @@
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException
-from boto3.dynamodb.types import TypeDeserializer
-
+from fastapi import APIRouter, HTTPException #type: ignore
+from boto3.dynamodb.types import TypeDeserializer #type: ignore
+from app.api.auth_deps import get_current_user
 from app.core.config import settings
-import boto3
+import boto3 #type: ignore
+from fastapi import Depends #type: ignore
 
 router = APIRouter()
 
@@ -81,8 +82,12 @@ def _normalize_history(raw_list: Any) -> List[Dict[str, Any]]:
     return deduped
 
 
-@router.get("/users/{user_id}/chat_history")
-def get_chat_history(user_id: str):
+@router.get("/users/chat_history")
+def get_chat_history(current_user=Depends(get_current_user)):
+    user_id = current_user.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
     dynamo = boto3.resource("dynamodb", region_name=settings.AWS_REGION)
     user_table = dynamo.Table(settings.USER_TABLE_NAME)
 

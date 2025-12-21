@@ -1,17 +1,28 @@
 # Backend/src/app/schemas/court.py
 from datetime import datetime, timezone
 import time
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr # type: ignore
 from typing import Any, Dict, List, Literal, Optional
 import uuid
 
 Stage = Literal["stage1", "stage2", "stage3", "stage4", "stage5"]
 Role = Literal["plaintiff", "defense", "jury", "judge"]
 
+class LoginRequest(BaseModel):
+    email: EmailStr 
+    password: str
+
+class RegisterRequest(BaseModel):
+    first_name: str
+    last_name: str
+    email: EmailStr
+    password: str
+    date_of_birth: str
+    
+
 class CourtRequest(BaseModel):
     case_id: str 
     case: str = Field(..., min_length=1, max_length=20000)
-    user_id: str
 
 class TranscriptRes(BaseModel):
     content: str
@@ -36,4 +47,6 @@ class CourtResponse(BaseModel):
     stage4: List[TranscriptMessage]
     stage5: TranscriptMessage
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
 
