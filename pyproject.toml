@@ -9,6 +9,7 @@ dependencies = [
     "boto3>=1.42.9",
     "dotenv>=0.9.9",
     "fastapi[standard]>=0.124.4",
+    "google-auth[requests]>=2.45.0",
     "httpx>=0.28.1",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",

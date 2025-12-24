@@ -9,6 +9,8 @@ from app.api.v1.routes.login import router as login_router
 from app.api.v1.routes.logout import router as logout_router
 from app.api.v1.routes.register import router as register_router
 from app.api.v1.routes.get_user import router as get_user_router
+from app.api.v1.routes.google_oauth.google_callback import router as get_google_callback
+from app.api.v1.routes.google_oauth.google_login import router as get_google_login
 
 api_router = APIRouter()
 
@@ -20,6 +22,9 @@ api_router.include_router(personal_chat_history, prefix="/court", tags=["persona
 api_router.include_router(chats_router, prefix="/court", tags=["chats"])
 api_router.include_router(get_user_router, prefix="/court", tags=["get_user"])
 
+# Auth apis
+api_router.include_router(get_google_login, prefix="/auth", tags=["auth"])
+api_router.include_router(get_google_callback, prefix="/auth", tags=["auth"])
 api_router.include_router(login_router, prefix="/auth", tags=["auth"])
 api_router.include_router(register_router, prefix="/auth", tags=["auth"])
 api_router.include_router(logout_router, prefix="/auth", tags=["auth"])

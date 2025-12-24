@@ -5,15 +5,12 @@ from app.core.config import settings
 router = APIRouter()
 
 @router.post("/logout")
-def logout_user(response: Response, current_user=Depends(get_current_user)):
-    if not current_user.get("user_id"):
-        raise HTTPException(status_code=401, detail="UnAuthorized")
+def logout_user(response: Response):
 
     response.delete_cookie(
         key="access_token",
         path="/",
-        secure=settings.COOKIE_SECURE,
-        samesite=settings.COOKIE_SAMESITE,
+        domain=settings.COOKIE_DOMAIN or None,
     )
 
     return {"status": "logged_out"}

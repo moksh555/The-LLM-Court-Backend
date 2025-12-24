@@ -10,10 +10,6 @@ async def run_court(request: CourtRequest, service: CourtService = Depends(get_c
 ) -> CourtResponse:
     resp = await service.run_case(request)
 
-    # Store it (exact method name depends on your CaseStore)
-    # Examples:
-    # await store.save(resp.case_id, resp.model_dump())
-    # store.save(resp.case_id, resp.model_dump())
 
     return resp
 

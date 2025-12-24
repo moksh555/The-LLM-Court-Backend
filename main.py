@@ -1,5 +1,5 @@
 # Backend/main.py
-from app.main import app
+from app.main import app #type:ignore
 
 
 def main():

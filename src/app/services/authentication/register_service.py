@@ -49,7 +49,8 @@ class RegisterService:
                     "password": hashed_password,
                     "date_of_birth": payload.date_of_birth,
                     "first_name": payload.first_name,
-                    "last_name": payload.last_name 
+                    "last_name": payload.last_name,
+                    "auth_provider": "regular"
                 }
             )
             return {"ok": True, "user_id":  user_id}
@@ -80,3 +81,5 @@ class RegisterService:
         password_encoded=password.encode("utf-8")
         hashed_password = bcrypt.hashpw(password_encoded,bcrypt.gensalt())
         return hashed_password.decode("utf-8")
+    
+    

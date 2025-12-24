@@ -40,6 +40,18 @@ class Config(BaseSettings):
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
     COOKIE_SECURE: bool = Field(default=False, env="COOKIE_SECURE") 
     COOKIE_SAMESITE: str = Field(default="lax", env="COOKIE_SAMESITE")
+    COOKIE_DOMAIN: str = Field(default="", env="COOKIE_SAMESITE")
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI")
+    GOOGLE_AUTH_URL: str = os.getenv("GOOGLE_AUTH_URL")
+    GOOGLE_TOKEN_URL: str = os.getenv("GOOGLE_TOKEN_URL")
+    
+    #Front end url
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL")
+
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

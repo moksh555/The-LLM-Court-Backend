@@ -23,26 +23,24 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        debug=settings.DEBUG,
-        lifespan=lifespan,
     )
 
     # CORS (adjust as needed)
-    if settings.CORS_ORIGINS:
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=[
-                "http://localhost:5173",
-                "https://www.llm-court.com",
-                "https://llm-court.com"
-            ],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+    app.include_router(api_router, prefix=settings.API_PREFIX)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:5173",
+            "https://www.llm-court.com",
+            "https://llm-court.com"
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     # Routes
-    app.include_router(api_router, prefix=settings.API_PREFIX)
+    
 
     return app
 
