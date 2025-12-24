@@ -1,4 +1,4 @@
-import httpx
+import httpx #type: ignore
 from typing import Any, Dict, List
 from app.core.config import settings
 import asyncio
