@@ -9,7 +9,6 @@ router = APIRouter()
 @router.get("/google/login")
 def google_login_request():
     state = secrets.token_urlsafe(64)
-    print(settings.GOOGLE_REDIRECT_URI,)
     params = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "redirect_uri": settings.GOOGLE_REDIRECT_URI,

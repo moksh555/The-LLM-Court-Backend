@@ -49,27 +49,13 @@ class GoogleOAuthServices:
         return {"status": "ok", "message": "validated required field"}
     
     def ensureUser(self, claims):
-        i = 0
-        print("moksh" + str(i))
-        i+=1
+
         user_table = self.dynamoDB.Table(self.user_table_name)
-        print("moksh" + str(i))
-        i+=1
         google_sub = claims.get("sub")
-        print("moksh" + str(i))
-        i+=1
         email = claims.get("email").lower().strip()
-        print("moksh" + str(i))
-        i+=1
         email_verified = claims.get("email_verified")
-        print("moksh" + str(i))
-        i+=1
         first_name = claims.get("given_name")
-        print("moksh" + str(i))
-        i+=1
         last_name = claims.get("family_name")
-        print("moksh" + str(i))
-        i+=1
 
         # resp = user_table.query(
         #     IndexName="google_sub-index",
@@ -82,15 +68,9 @@ class GoogleOAuthServices:
         FilterExpression=Attr("google_sub").eq(google_sub),
         Limit=1,
         )
-        print("moksh" + str(i))
-        i+=1
         items = resp.get("Items", [])
-        print("moksh" + str(i))
-        i+=1
         if items:
             user = items[0]
-            print("moksh" + str(i))
-            i+=1
             return user
         else:
             now = int(time.time())
@@ -106,15 +86,11 @@ class GoogleOAuthServices:
                 "created_at_epoch": now,
                 "auth_provider": "google",
             }
-            print("moksh" + str(i))
-            i+=1
             try:
                 user_table.put_item(
                     Item=new_user,
                     ConditionExpression="attribute_not_exists(user_id)",
                 )
-                print("moksh" + str(i))
-                i+=1
                 return new_user
             except (ClientError, BotoCoreError) as e:
                 raise AuthDependencyError("User store unavailable: Register Service") from e

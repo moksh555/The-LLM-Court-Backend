@@ -40,7 +40,7 @@ class Config(BaseSettings):
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
     COOKIE_SECURE: bool = Field(default=False, env="COOKIE_SECURE") 
     COOKIE_SAMESITE: str = Field(default="lax", env="COOKIE_SAMESITE")
-    COOKIE_DOMAIN: str = Field(default="", env="COOKIE_SAMESITE")
+    COOKIE_DOMAIN: Optional[str] = Field(default=None, env="COOKIE_DOMAIN")
 
     # Google OAuth
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")

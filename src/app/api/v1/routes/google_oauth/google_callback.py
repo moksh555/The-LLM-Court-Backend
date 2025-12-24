@@ -25,8 +25,7 @@ def handle_google_callback(request: Request, response: Response, googlOAuthServi
         raise HTTPException(status_code=400, detail="Missing code/state from Google callback.")
     
     cookieState = request.cookies.get("oauth_state")
-    print("callbackState:", callbackState)
-    print("cookieState:", cookieState)
+
     try:
         googlOAuthService.ensureCookieState(cookieState)
         googlOAuthService.checkState(callbackState, cookieState)
@@ -71,7 +70,6 @@ def handle_google_callback(request: Request, response: Response, googlOAuthServi
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to create/login user") from e
     
-    print(user)
     # now create token
     now = datetime.datetime.now(datetime.timezone.utc)
     payload = {
@@ -87,7 +85,6 @@ def handle_google_callback(request: Request, response: Response, googlOAuthServi
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-    print(app_token)
     resp = RedirectResponse(url=f"{settings.FRONTEND_URL}/dashboard", status_code=302)
     resp.set_cookie(
         key="access_token",
